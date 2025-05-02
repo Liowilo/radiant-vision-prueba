@@ -13,3 +13,62 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  players    Player[]
+}
+
+model Player {
+  id         String   @id @default(cuid())
+  valorantId String   @unique
+  nickname   String
+  rank       String?
+  matches    Match[]
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Match {
+  id          String   @id @default(cuid())
+  matchId     String   @unique
+  date        DateTime
+  mapName     String
+  score       String
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+  performance Performance?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Performance {
+  id            String   @id @default(cuid())
+  kills         Int
+  deaths        Int
+  assists       Int
+  acs           Float
+  kd            Float
+  hsPercentage  Float?
+  matchId       String   @unique
+  match         Match    @relation(fields: [matchId], references: [id])
+  prediction    Prediction?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Prediction {
+  id            String   @id @default(cuid())
+  winProbability Float
+  recommendedAgent String?
+  performanceId  String   @unique
+  performance    Performance @relation(fields: [performanceId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
